@@ -10,6 +10,7 @@ import Text.Pandoc.Options ( WriterOptions(..)
                            , HTMLMathMethod(MathJax, KaTeX)
                            , Extension(..)
                            , WrapOption(WrapNone))
+import Text.Pandoc.Shared (eastAsianLineBreakFilter)
 import Hakyll
 
 
@@ -130,14 +131,13 @@ pandocCustomCompiler =
         { writerExtensions = newExtensions
         , writerHTMLMathMethod = MathJax ""
         , writerWrapText = WrapNone }
-    readerOptions =
-      let cjkExtensions = [ Ext_east_asian_line_breaks ]
-          defaultExtensions = readerExtensions defaultHakyllReaderOptions
-          newExtensions = foldr enableExtension defaultExtensions cjkExtensions
-      in
-        defaultHakyllReaderOptions
-        { readerExtensions = newExtensions }
-  in pandocCompilerWith readerOptions writerOptions
+
+    -- NOTE: Ext_east_asian_line_breaks doesn't work when called as libraries.
+    -- See https://github.com/jgm/pandoc/pull/4674
+    readerOptions = defaultHakyllReaderOptions
+
+    transform p = return $ eastAsianLineBreakFilter p
+  in pandocCompilerWithTransformM readerOptions writerOptions transform
 
 ----------------------------------------------------------------
 
