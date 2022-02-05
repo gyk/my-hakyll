@@ -1,0 +1,8 @@
+
+_cache/
+_site/
+.stack-work/
+
+site
+site.exe
+*.cabal
