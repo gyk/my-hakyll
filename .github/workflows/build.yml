@@ -27,15 +27,20 @@ jobs:
         with:
           ghc-version: ${{ matrix.ghc }}
           stack-version: ${{ matrix.stack }}
-      - name: Cache dependencies
+
+      - name: Cache $APPDATA (~/.stack) folder
         uses: actions/cache@v2
         with:
-          # path: 'C:\Users\runneradmin\AppData\Local\Programs\stack'
-          path: ~/.stack
-          key: ${{ runner.os }}-${{ hashFiles('stack.yaml.lock') }}-${{ hashFiles('site.cabal') }}
+          path: 'C:\Users\runneradmin\AppData\Roaming\stack\'
+          key: ${{ runner.os }}-appdata-${{ hashFiles('stack.yaml.lock') }}-${{ hashFiles('site.cabal') }}
+          restore-keys: ${{ runner.os }}-appdata
 
-      - name: Install dependencies
-        run: stack install --only-dependencies
+      - name: Cache $LOCALAPPDATA (~/.local/bin) folder
+        uses: actions/cache@v2
+        with:
+          path: 'C:\Users\runneradmin\AppData\Local\Programs\stack'
+          key: ${{ runner.os }}-localappdata-${{ hashFiles('stack.yaml.lock') }}-${{ hashFiles('site.cabal') }}
+          restore-keys: ${{ runner.os }}-localappdata
 
       - name: Build
         run: stack build
