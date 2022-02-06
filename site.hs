@@ -5,11 +5,10 @@ import Data.Monoid ((<>))
 import GHC.IO.Encoding
 import System.FilePath (takeDirectory, (</>))
 import Text.Pandoc.Extensions (enableExtension)
-import Text.Pandoc.Options ( WriterOptions(..)
-                           , ReaderOptions(..)
+import Text.Pandoc.Options ( ReaderOptions(..)
+                           , WriterOptions(..)
                            , HTMLMathMethod(MathJax, KaTeX)
-                           , Extension(..)
-                           , WrapOption(WrapNone))
+                           , Extension(..))
 import Text.Pandoc.Shared (eastAsianLineBreakFilter)
 import Hakyll
 
@@ -120,6 +119,10 @@ niceRoute = customRoute createIndexRoute
 
 pandocCustomCompiler =
   let
+    -- NOTE: Ext_east_asian_line_breaks doesn't work when called as libraries.
+    -- See https://github.com/jgm/pandoc/pull/4674
+    readerOptions = defaultHakyllReaderOptions
+
     writerOptions =
       let mathExtensions =
             [ Ext_tex_math_dollars  -- $..$ or $$..$$
@@ -129,14 +132,9 @@ pandocCustomCompiler =
       in
         defaultHakyllWriterOptions
         { writerExtensions = newExtensions
-        , writerHTMLMathMethod = MathJax ""
-        , writerWrapText = WrapNone }
+        , writerHTMLMathMethod = MathJax "" }
 
-    -- NOTE: Ext_east_asian_line_breaks doesn't work when called as libraries.
-    -- See https://github.com/jgm/pandoc/pull/4674
-    readerOptions = defaultHakyllReaderOptions
-
-    transform p = return $ eastAsianLineBreakFilter p
+    transform = return . eastAsianLineBreakFilter
   in pandocCompilerWithTransformM readerOptions writerOptions transform
 
 ----------------------------------------------------------------
@@ -158,17 +156,3 @@ markdownPostBehaviorTags tags = do
     >>= loadAndApplyTemplate "templates/post.html" (postCtxTags tags)
     >>= loadAndApplyTemplate "templates/default.html" (postCtxTags tags)
     >>= relativizeUrls
-
-
---markdownPostBehavior :: Rules ()
---markdownPostBehavior = do
---  route $ niceRoute
---  compile $ do
---    body <- getResourceBody
---    identifier <- getUnderlying
---    return $ renderPandoc (fmap (preFilters (toFilePath identifier)) body)
---    >>= applyFilter postFilters
---    >>= loadAndApplyTemplate "templates/default.html" yContext
---    >>= loadAndApplyTemplate "templates/boilerplate.html" yContext
---    >>= relativizeUrls
---    >>= removeIndexHtml
