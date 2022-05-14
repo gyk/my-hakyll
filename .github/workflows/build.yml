@@ -47,8 +47,15 @@ jobs:
           dir=$(stack path --dist-dir)/build/site
           cp "$dir/site.exe" ./package/site.exe
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+      - name: Zip files
+        run: |
+          Compress-Archive -Path .\package\ -DestinationPath my-hakyll.zip
+
+      - name: Create release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: site.exe
-          path: package
+          name: my-hakyll
+          tag_name: my-hakyll-latest
+          files: my-hakyll.zip
