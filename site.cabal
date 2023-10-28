@@ -1,0 +1,22 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.35.2.
+--
+-- see: https://github.com/sol/hpack
+
+name:           site
+version:        0.2.0.0
+build-type:     Simple
+
+executable site
+  main-is: site.hs
+  other-modules:
+      Paths_site
+  ghc-options: -threaded
+  build-depends:
+      base >=4.7 && <5
+    , containers
+    , filepath
+    , hakyll ==4.13.*
+    , pandoc ==2.9.*
+  default-language: Haskell2010

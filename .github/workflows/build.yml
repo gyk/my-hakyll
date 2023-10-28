@@ -17,35 +17,33 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        stack: ['2.7.3']
         ghc: ['8.8.4']
+        cabal: ['3.0.0']
         os: [windows-latest] # macOS-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Setup Haskell
-        uses: haskell/actions/setup@v1
+        uses: haskell-actions/setup@v2
         with:
           ghc-version: ${{ matrix.ghc }}
-          stack-version: ${{ matrix.stack }}
+          cabal-version: ${{ matrix.cabal }}
       - name: Cache dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
-          # path: 'C:\Users\runneradmin\AppData\Local\Programs\stack'
-          path: ~/.stack
-          key: ${{ runner.os }}-${{ hashFiles('stack.yaml.lock') }}-${{ hashFiles('site.cabal') }}
+          path: ~/.cabal
+          key: ${{ runner.os }}-${{ hashFiles('site.cabal') }}
 
       - name: Install dependencies
-        run: stack install --only-dependencies
+        run: cabal install
 
       - name: Build
-        run: stack build
+        run: cabal build
 
       - name: Package artifacts
         shell: bash
         run: |
           mkdir package
-          dir=$(stack path --dist-dir)/build/site
-          cp "$dir/site.exe" ./package/site.exe
+          cp $(cabal exec which site) ./package/site.exe
 
       - name: Zip files
         run: |
